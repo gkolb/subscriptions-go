@@ -8,9 +8,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi"
 	"github.com/gregkolb/example/graph"
 	"github.com/gregkolb/example/graph/generated"
-	"github.com/go-chi/chi"
 	"github.com/rs/cors"
 	// "github.com/gorilla/websocket"
 )
@@ -43,13 +43,14 @@ func main() {
 
 	// Add CORS middleware around every request
 	// See https://github.com/rs/cors for full option listing
-	router.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:3000", "*"},
-		AllowCredentials: true,
-		Debug:            true,
-	}).Handler)
+	// router.Use(cors.New(cors.Options{
+	// 	AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:3000", "*"},
+	// 	AllowCredentials: true,
+	// 	Debug:            true,
+	// }).Handler)
 
-
+	router.Use(cors.Default().Handler)
+	
     srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	srv.AddTransport(&transport.Websocket{})
     // srv.AddTransport(&transport.Websocket{
@@ -63,7 +64,7 @@ func main() {
     //     },
     // })
 
-	router.Handle("/", playground.Handler("Starwars", "/query"))
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
